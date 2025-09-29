@@ -1,0 +1,15 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "MyApi.Grpc";
+
+service WeatherService {
+  rpc GetWeather(WeatherRequest) returns (WeatherReply);
+}
+
+message WeatherRequest {
+  string city = 1;
+}
+
+message WeatherReply {
+  string forecast = 1;
+}
