@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using MyApi.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,32 +12,9 @@ builder.Services.AddSwaggerGen();
 // Configure gRPC services
 builder.Services.AddGrpc();
 
-// Configure Kestrel to use one port for both REST and gRPC
-if (builder.Environment.IsDevelopment())
-{
-    // Local development - bind to specific localhost port
-    builder.WebHost.ConfigureKestrel(options =>
-    {
-        options.ListenLocalhost(7254, o => 
-        {
-            o.Protocols = HttpProtocols.Http1AndHttp2;
-            o.UseHttps();
-        });
-    });
-}
-else
-{
-    // Azure deployment - let Azure handle port binding
-    builder.WebHost.ConfigureKestrel(options =>
-    {
-        options.ConfigureEndpointDefaults(listenOptions =>
-        {
-            listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
-        });
-    });
-}
-
 var app = builder.Build();
+
+app.UseGrpcWeb();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -50,7 +28,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 // Map gRPC services
-app.MapGrpcService<WeatherServiceImpl>();
+app.MapGrpcService<WeatherServiceImpl>().EnableGrpcWeb();
 
 // Map REST API controllers
 app.MapControllers();
