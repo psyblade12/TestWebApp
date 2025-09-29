@@ -23,7 +23,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapGrpcService<WeatherServiceImpl>();
-app.MapGet("/", () => "This server only supports gRPC. Use a gRPC client.");
 
 app.MapControllers();
 
