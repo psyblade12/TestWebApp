@@ -12,15 +12,29 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddGrpc();
 
 // Configure Kestrel to use one port for both REST and gRPC
-builder.WebHost.ConfigureKestrel(options =>
+if (builder.Environment.IsDevelopment())
 {
-    // HTTPS port for both REST (HTTP/1.1) and gRPC (HTTP/2)
-    options.ListenLocalhost(7254, o => 
+    // Local development - bind to specific localhost port
+    builder.WebHost.ConfigureKestrel(options =>
     {
-        o.Protocols = HttpProtocols.Http1AndHttp2;
-        o.UseHttps();
+        options.ListenLocalhost(7254, o => 
+        {
+            o.Protocols = HttpProtocols.Http1AndHttp2;
+            o.UseHttps();
+        });
     });
-});
+}
+else
+{
+    // Azure deployment - let Azure handle port binding
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        options.ConfigureEndpointDefaults(listenOptions =>
+        {
+            listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+        });
+    });
+}
 
 var app = builder.Build();
 
