@@ -22,8 +22,6 @@ builder.WebHost.ConfigureKestrel(options =>
     });
 });
 
-
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -42,8 +40,5 @@ app.MapGrpcService<WeatherServiceImpl>();
 
 // Map REST API controllers
 app.MapControllers();
-
-// Add a simple endpoint to test if the server is responding
-app.MapGet("/", () => "gRPC and REST server is running!");
 
 app.Run();
