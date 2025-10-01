@@ -41,6 +41,13 @@ namespace TestWebApp.Controllers
 
             return $"The returned data {JsonSerializer.Serialize(item)}. Elapsed time: {sw.ElapsedMilliseconds}ms";
         }
+
+        [HttpGet("TestEndpoint")]
+        public async Task<string> TestEndpoint()
+        {
+            await Task.Delay(5);
+            return $"Hello....";
+        }
     }
 
     class AccountNumberData
