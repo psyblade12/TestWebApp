@@ -9,10 +9,10 @@ namespace TestWebApp.Services
 
         public CosmosDbService(IConfiguration configuration)
         {
-            var accountEndpoint = configuration["CosmosDb__AccountEndpoint"];
-            var accountKey = configuration["CosmosDb__AccountKey"];
-            var databaseName = configuration["CosmosDb__DatabaseName"];
-            var containerName = configuration["CosmosDb__ContainerName"];
+            var accountEndpoint = configuration["CosmosDbAccountEndpoint"];
+            var accountKey = configuration["CosmosDbAccountKey"];
+            var databaseName = configuration["CosmosDbDatabaseName"];
+            var containerName = configuration["CosmosDbContainerName"];
 
             var client = new CosmosClient(accountEndpoint, accountKey);
             _container = client.GetContainer(databaseName, containerName);
