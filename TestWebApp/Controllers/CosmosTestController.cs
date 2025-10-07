@@ -45,7 +45,7 @@ namespace TestWebApp.Controllers
         [HttpGet("TestEndpoint")]
         public async Task<string> TestEndpoint()
         {
-            return $"Hello....";
+            return await Task.FromResult($"Hello....");
         }
     }
 

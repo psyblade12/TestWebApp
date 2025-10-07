@@ -29,6 +29,14 @@ namespace TestWebApp.Models
         //public byte[] NameAndFields { get; set; } = Array.Empty<byte>();
     }
 
+    class StreamData
+    {
+        public int Id { get; set; }
+        public string Text1 { get; set; } = string.Empty;
+        public string Text2 { get; set; } = string.Empty;
+    }
+
+
     public class AppLogic
     {
         public Dictionary<string, byte[]> ReturnData(string input)
@@ -107,6 +115,88 @@ namespace TestWebApp.Models
             }
 
             return index;
+        }
+
+        public async Task<List<int>> ProcessDataByStream()
+        {
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+            GC.WaitForPendingFinalizers();
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+
+            long before = GC.GetTotalMemory(true);
+
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "streamdata.csv");
+            var records = new List<StreamData>();
+
+            using (var reader = new StreamReader(filePath))
+            {
+                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+                {
+                    await foreach (var record in csv.GetRecordsAsync<StreamData>())
+                    {
+                        records.Add(record);
+                    }
+                }
+            }
+
+            var result = new List<int>();
+            foreach(var item in records)
+            {
+                var index = item.Text2.IndexOf("666");
+                result.Add(index);
+            }
+
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+            GC.WaitForPendingFinalizers();
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+
+            long after = GC.GetTotalMemory(true);
+            var memoryFootPrint = (after - before) / 1024.0;
+            return result;
+        }
+
+        public async Task<List<int>> ProcessDataByStream2()
+        {
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+            GC.WaitForPendingFinalizers();
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+
+            long before = GC.GetTotalMemory(true);
+
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "streamdata.csv");
+            var records = new List<StreamData>();
+
+            var result = new List<int>();
+            var listMemory = new List<int>();
+
+            using (var reader = new StreamReader(filePath))
+            {
+                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+                {
+                    await foreach (var record in csv.GetRecordsAsync<StreamData>())
+                    {
+                        var index = record.Text2.IndexOf("666");
+                        result.Add(index);
+
+                        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+                        GC.WaitForPendingFinalizers();
+                        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+
+                        long after = GC.GetTotalMemory(true);
+                        var memoryFootPrint = (after - before) / 1024.0;
+                        listMemory.Add((int)memoryFootPrint);
+                    }
+                }
+            }
+
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+            GC.WaitForPendingFinalizers();
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+
+            long final = GC.GetTotalMemory(true);
+            var memoryFootPrintFinal = (final - before) / 1024.0;
+
+            return result;
         }
     }
 

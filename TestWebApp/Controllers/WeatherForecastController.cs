@@ -53,7 +53,7 @@ namespace TestWebApp.Controllers
             //GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
 
             //long after = GC.GetTotalMemory(true);
-            //var memoryFootPrint = (after - before) / 1024.0;
+            //var memoryFootPrint = (after - before) / 1024.0; 
 
             var index = appLogic.FlushToDisk(result);
             GlobalIndex.Index = index;
@@ -95,6 +95,15 @@ namespace TestWebApp.Controllers
         public string ReturnHello(string name)
         {
             return $"Hello, {name}";
+        }
+
+
+        [HttpGet("StreamData")]
+        public string StreamData()
+        {
+            var appLogic = new AppLogic();
+            var result = appLogic.ProcessDataByStream2();
+            return $"OK...";
         }
     }
 }
