@@ -11,10 +11,12 @@ namespace TestWebApp.Controllers
     public class CosmosTestController : ControllerBase
     {
         private readonly CosmosDbService _cosmosService;
+        private readonly RedisCacheService _redis;
 
-        public CosmosTestController(CosmosDbService cosmosService)
+        public CosmosTestController(CosmosDbService cosmosService, RedisCacheService redis)
         {
             _cosmosService = cosmosService;
+            _redis = redis;
         }
 
         [HttpGet]
@@ -46,6 +48,25 @@ namespace TestWebApp.Controllers
         public async Task<string> TestEndpoint()
         {
             return await Task.FromResult($"Hello....");
+        }
+
+        [HttpGet("GetByIDWithCache")]
+        public async Task<IActionResult> GetByIDWithCache(string id, string partitionKey)
+        {
+            string cacheKey = $"product:{id}";
+            var cachedValue = await _redis.GetAsync(cacheKey);
+            if (!string.IsNullOrEmpty(cachedValue))
+            {
+                var cachedProduct = System.Text.Json.JsonSerializer.Deserialize<AccountNumberData>(cachedValue);
+                return Ok(cachedProduct);
+            }
+
+            var items = await _cosmosService.GetItemAsync<AccountNumberData>(id, partitionKey);
+
+            var serialized = System.Text.Json.JsonSerializer.Serialize(items);
+            await _redis.SetAsync(cacheKey, serialized);
+
+            return Ok(items);
         }
     }
 
