@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
 using TestWebApp.Services;
 
@@ -67,6 +68,46 @@ namespace TestWebApp.Controllers
             await _redis.SetAsync(cacheKey, serialized);
 
             return Ok(items);
+        }
+
+        [HttpGet("TestQueryTimeCosmosRedis")]
+        public async Task<string> TestQueryTimeCosmosRedis(string id, string partitionKey)
+        {
+            //Prepare cache:
+            var items = await _cosmosService.GetItemAsync<AccountNumberData>(id, partitionKey);
+            var serialized = System.Text.Json.JsonSerializer.Serialize(items);
+            string cacheKey = $"product:{id}";
+            await _redis.SetAsync(cacheKey, serialized);
+
+            //Perform the test
+            StringBuilder returnString = new StringBuilder();
+
+            //Cosmos part:
+            returnString.Append($"Testing cosmos... \r\n");
+            for (int i = 0; i<10; i++)
+            {
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                var item = await _cosmosService.GetItemAsync<AccountNumberData>(id, partitionKey);
+                sw.Stop();
+
+                returnString.Append($"The returned data {JsonSerializer.Serialize(item)}. Elapsed time: {sw.ElapsedMilliseconds}ms \r\n");
+            }
+
+            //Redis part:
+            returnString.Append($"Testing redis... \r\n");
+            for (int i = 0; i < 10; i++)
+            {
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                var item = await _redis.GetAsync(cacheKey); 
+                sw.Stop();
+
+                returnString.Append($"The returned data {item}. Elapsed time: {sw.ElapsedMilliseconds}ms \r\n");
+            }
+
+
+            return returnString.ToString(); ;
         }
     }
 
