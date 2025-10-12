@@ -91,7 +91,8 @@ namespace TestWebApp.Controllers
                 var item = await _cosmosService.GetItemAsync<AccountNumberData>(id, partitionKey);
                 sw.Stop();
 
-                returnString.Append($"The returned data {JsonSerializer.Serialize(item)}. Elapsed time: {sw.ElapsedMilliseconds}ms \r\n");
+                double microseconds = (double)sw.ElapsedTicks / Stopwatch.Frequency * 1_000_000;
+                returnString.Append($"The returned data {JsonSerializer.Serialize(item)}. Elapsed time: {microseconds:F2}µs \r\n");
             }
 
             //Redis part:
@@ -103,7 +104,8 @@ namespace TestWebApp.Controllers
                 var item = await _redis.GetAsync(cacheKey); 
                 sw.Stop();
 
-                returnString.Append($"The returned data {item}. Elapsed time: {sw.ElapsedMilliseconds}ms \r\n");
+                double microseconds = (double)sw.ElapsedTicks / Stopwatch.Frequency * 1_000_000;
+                returnString.Append($"The returned data {item}. Elapsed time: {microseconds:F2}µs \r\n");
             }
 
 
