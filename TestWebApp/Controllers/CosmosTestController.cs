@@ -157,7 +157,7 @@ namespace TestWebApp.Controllers
             try
             {
                 returnString.Append($"Testing disk lookup... \r\n");
-                string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "accounts.bin");
+                string filePath = Path.Combine(AppContext.BaseDirectory, "data", "accounts.bin");
                 byte[] buffer = new byte[index["c91c79d2-bfe2-4068-a60a-9f065ac8e078"].length];
 
                 using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))

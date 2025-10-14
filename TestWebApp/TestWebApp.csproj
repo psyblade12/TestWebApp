@@ -25,4 +25,10 @@
     <Protobuf Include="Protos\WeatherService.proto" GrpcServices="Server" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="data\accounts.bin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
