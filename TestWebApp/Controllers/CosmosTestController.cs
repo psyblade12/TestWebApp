@@ -154,32 +154,37 @@ namespace TestWebApp.Controllers
             }
 
             //Disk lookup part part:
-            returnString.Append($"Testing disk lookup... \r\n");
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "accounts.bin");
-            byte[] buffer = new byte[index["c91c79d2-bfe2-4068-a60a-9f065ac8e078"].length];
-
-            using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            try
             {
-                for (int i = 0; i < 10; i++)
+                returnString.Append($"Testing disk lookup... \r\n");
+                string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "accounts.bin");
+                byte[] buffer = new byte[index["c91c79d2-bfe2-4068-a60a-9f065ac8e078"].length];
+
+                using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
-                    Stopwatch sw = new Stopwatch();
-                    sw.Start();
+                    for (int i = 0; i < 10; i++)
+                    {
+                        Stopwatch sw = new Stopwatch();
+                        sw.Start();
 
-                    var position = index["c91c79d2-bfe2-4068-a60a-9f065ac8e078"];
-                    fs.Seek(position.offset, SeekOrigin.Begin);
-                    fs.Read(buffer, 0, buffer.Length);
+                        var position = index["c91c79d2-bfe2-4068-a60a-9f065ac8e078"];
+                        fs.Seek(position.offset, SeekOrigin.Begin);
+                        fs.Read(buffer, 0, buffer.Length);
 
-                    string json = Encoding.UTF8.GetString(buffer);
-                    var item = JsonSerializer.Deserialize<AccountNumberData>(json);
+                        string json = Encoding.UTF8.GetString(buffer);
+                        var item = JsonSerializer.Deserialize<AccountNumberData>(json);
 
-                    sw.Stop();
+                        sw.Stop();
 
-                    double microseconds = (double)sw.ElapsedTicks / Stopwatch.Frequency * 1_000_000;
-                    returnString.Append($"The returned data {JsonSerializer.Serialize(item)}. Elapsed ticks:{sw.ElapsedTicks}. Elapsed time: {microseconds:F2}µs \r\n");
+                        double microseconds = (double)sw.ElapsedTicks / Stopwatch.Frequency * 1_000_000;
+                        returnString.Append($"The returned data {JsonSerializer.Serialize(item)}. Elapsed ticks:{sw.ElapsedTicks}. Elapsed time: {microseconds:F2}µs \r\n");
+                    }
                 }
             }
-            
-
+            catch
+            {
+                return "Error reading from disk....";
+            }
             return returnString.ToString(); ;
         }
     }
