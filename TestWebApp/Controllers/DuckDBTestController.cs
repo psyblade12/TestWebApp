@@ -17,7 +17,7 @@ namespace TestWebApp.Controllers
         public async Task<IActionResult> GetPreview()
         {
             string filePath = Path.Combine(AppContext.BaseDirectory, "data", "generated", "*.parquet");
-            var result = await _duckDb.QueryAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM read_parquet('{filePath}') g INNER JOIN (SELECT * FROM read_parquet('{filePath}') WHERE datevalue = '2025-09-22' AND intvalue1 > 930 AND intvalue1  <950) as a ON g.ID <> a.ID WHERE g.datevalue = '2025-09-22' AND g.intvalue1 > 930 AND g.intvalue1 < 950 GROUP BY g.datevalue;");
+            var result = await _duckDb.QueryAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM read_parquet('{filePath}') g INNER JOIN (SELECT * FROM read_parquet('{filePath}') WHERE datevalue = '2025-12-22' AND intvalue1 > 400 AND intvalue1  <950) as a ON g.ID <> a.ID WHERE g.datevalue = '2025-12-22' AND g.intvalue1 > 400 AND g.intvalue1 < 950 GROUP BY g.datevalue;");
             return Ok(result);
         }
 

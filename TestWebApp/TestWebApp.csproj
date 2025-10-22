@@ -33,6 +33,9 @@
     <None Update="data\flights-1m.parquet">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="data\generated\random_data-01.parquet">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
