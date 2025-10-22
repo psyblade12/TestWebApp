@@ -10,7 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<CosmosDbService>();
-builder.Services.AddSingleton<RedisCacheService>();
+builder.Services.AddSingleton<DuckDbService>();
 
 // Configure gRPC services
 builder.Services.AddGrpc();
