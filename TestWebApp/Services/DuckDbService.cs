@@ -103,7 +103,7 @@ namespace TestWebApp.Services
                 results.Add(item);
             }
 
-            //_pool.Enqueue(connection);
+            _pool.Enqueue(connection);
             return results;
         }
     }
