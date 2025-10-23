@@ -27,12 +27,12 @@ namespace TestWebApp.Services
                 cmd.CommandText = $"SET azure_storage_connection_string = '{blobStorageConnectionString}'; ";
                 cmd.ExecuteNonQuery();
 
+                cmd.CommandText = $"SET azure_transport_option_type = 'curl';";
+                cmd.ExecuteNonQuery();
+
                 if (i == 0)
                 {
                     cmd.CommandText = $"INSTALL azure; LOAD azure;";
-                    cmd.ExecuteNonQuery();
-
-                    cmd.CommandText = $"SET azure_transport_option_type = 'curl';";
                     cmd.ExecuteNonQuery();
 
                     cmd.CommandText = $"CREATE OR REPLACE VIEW generated AS SELECT * FROM read_parquet('azure://tantestdatalake.blob.core.windows.net/data/generated/*.parquet');";
