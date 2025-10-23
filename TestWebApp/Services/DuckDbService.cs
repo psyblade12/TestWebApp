@@ -10,7 +10,7 @@ namespace TestWebApp.Services
     public class DuckDbService
     {
         private readonly ConcurrentQueue<DuckDBConnection> _pool;
-        private readonly int _poolSize = 10;
+        private readonly int _poolSize = 20;
 
         public DuckDbService(IConfiguration configuration)
         {
@@ -24,21 +24,23 @@ namespace TestWebApp.Services
                 conn.Open();
 
                 using var cmd = conn.CreateCommand();
-
-                cmd.CommandText = $"INSTALL azure; LOAD azure;";
-                cmd.ExecuteNonQuery();
-
-                cmd.CommandText = $"SET azure_transport_option_type = 'curl';";
-                cmd.ExecuteNonQuery();
-
                 cmd.CommandText = $"SET azure_storage_connection_string = '{blobStorageConnectionString}'; ";
                 cmd.ExecuteNonQuery();
 
-                cmd.CommandText = $"CREATE OR REPLACE VIEW generated AS SELECT * FROM read_parquet('azure://tantestdatalake.blob.core.windows.net/data/generated/*.parquet');";
-                cmd.ExecuteNonQuery();
+                if (i == 0)
+                {
+                    cmd.CommandText = $"INSTALL azure; LOAD azure;";
+                    cmd.ExecuteNonQuery();
 
-                cmd.CommandText = $"CREATE OR REPLACE VIEW flights AS SELECT * FROM read_parquet('azure://tantestdatalake.blob.core.windows.net/data/flightdata/*.parquet');";
-                cmd.ExecuteNonQuery();
+                    cmd.CommandText = $"SET azure_transport_option_type = 'curl';";
+                    cmd.ExecuteNonQuery();
+
+                    cmd.CommandText = $"CREATE OR REPLACE VIEW generated AS SELECT * FROM read_parquet('azure://tantestdatalake.blob.core.windows.net/data/generated/*.parquet');";
+                    cmd.ExecuteNonQuery();
+
+                    cmd.CommandText = $"CREATE OR REPLACE VIEW flights AS SELECT * FROM read_parquet('azure://tantestdatalake.blob.core.windows.net/data/flightdata/*.parquet');";
+                    cmd.ExecuteNonQuery();
+                }
 
                 _pool.Enqueue(conn);
             }
@@ -101,7 +103,7 @@ namespace TestWebApp.Services
                 results.Add(item);
             }
 
-            _pool.Enqueue(connection);
+            //_pool.Enqueue(connection);
             return results;
         }
     }
