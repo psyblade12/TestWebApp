@@ -90,6 +90,46 @@ namespace TestWebApp.Controllers
             return resultString;
         }
 
+        [HttpGet("TestLatency5")]
+        public async Task<string> TestLatency5()
+        {
+            try
+            {
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                string filePath = Path.Combine(AppContext.BaseDirectory, "data", "generated", "*.parquet");
+                var result = await _duckDb.QueryStoredProcedureAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM flights;");
+                sw.Stop();
+
+                string resultString = $"Elapsed time is: {sw.ElapsedMilliseconds} ms. Data: {JsonSerializer.Serialize(result)}";
+                return resultString;
+            }
+            catch (Exception ex)
+            {
+                return $"An error occurred: {ex.Message}";
+            }
+        }
+
+        [HttpGet("TestLatency6")]
+        public async Task<string> TestLatency6()
+        {
+            try
+            {
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                string filePath = Path.Combine(AppContext.BaseDirectory, "data", "generated", "*.parquet");
+                var result = await _duckDb.QueryAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM flights WHERE FL_DATE >= '2006-01-01' AND FL_DATE <= '2006-01-01';");
+                sw.Stop();
+
+                string resultString = $"Elapsed time is: {sw.ElapsedMilliseconds} ms. Data: {JsonSerializer.Serialize(result)}";
+                return resultString;
+            }
+            catch (Exception ex)
+            {
+                return $"An error occurred: {ex.Message}";
+            }
+        }
+
         [HttpGet("ReturnString")]
         public async Task<string> ReturnString()
         {
