@@ -36,7 +36,6 @@ namespace TestWebApp.Controllers
         {
             try
             {
-                throw new Exception();
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
                 string filePath = Path.Combine(AppContext.BaseDirectory, "data", "generated", "*.parquet");
@@ -50,6 +49,13 @@ namespace TestWebApp.Controllers
             {
                 return $"An error occurred: {ex.Message}";
             }
+        }
+
+        [HttpGet("ReturnString")]
+        public async Task<string> ReturnString()
+        {
+            string result = await Task.FromResult("a string...");
+            return result;
         }
     }
 
