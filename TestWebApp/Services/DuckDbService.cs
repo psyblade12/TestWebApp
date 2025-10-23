@@ -28,6 +28,9 @@ namespace TestWebApp.Services
                 cmd.CommandText = $"INSTALL azure; LOAD azure;";
                 cmd.ExecuteNonQuery();
 
+                cmd.CommandText = $"SET azure_transport_option_type = 'curl';";
+                cmd.ExecuteNonQuery();
+
                 cmd.CommandText = $"SET azure_storage_connection_string = '{blobStorageConnectionString}'; ";
                 cmd.ExecuteNonQuery();
 
