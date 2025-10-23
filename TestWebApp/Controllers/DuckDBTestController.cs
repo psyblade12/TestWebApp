@@ -39,7 +39,7 @@ namespace TestWebApp.Controllers
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
                 string filePath = Path.Combine(AppContext.BaseDirectory, "data", "generated", "*.parquet");
-                var result = await _duckDb.QueryAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM flights;");
+                var result = await _duckDb.QueryAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM read_parquet('azure://tantestdatalake.blob.core.windows.net/data/flightdata/*.parquet');");
                 sw.Stop();
 
                 string resultString = $"Elapsed time is: {sw.ElapsedMilliseconds} ms. Data: {JsonSerializer.Serialize(result)}";

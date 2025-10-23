@@ -28,8 +28,8 @@ namespace TestWebApp.Services
                 cmd.CommandText = $"SET azure_storage_connection_string = '{blobStorageConnectionString}'; ";
                 cmd.ExecuteNonQuery();
 
-                cmd.CommandText = $"CREATE VIEW generated AS SELECT * FROM read_parquet('azure://tantestdatalake.blob.core.windows.net/data/generated/*.parquet');";
-                cmd.ExecuteNonQuery();
+                //cmd.CommandText = $"CREATE VIEW generated AS SELECT * FROM read_parquet('azure://tantestdatalake.blob.core.windows.net/data/generated/*.parquet');";
+                //cmd.ExecuteNonQuery();
 
                 //cmd.CommandText = $"CREATE VIEW flights AS SELECT * FROM read_parquet('azure://tantestdatalake.blob.core.windows.net/data/flightdata/*.parquet');";
                 //cmd.ExecuteNonQuery();
