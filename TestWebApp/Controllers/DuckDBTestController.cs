@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
+using System.Text.Json;
 using TestWebApp.Services;
 
 namespace TestWebApp.Controllers
@@ -27,6 +29,19 @@ namespace TestWebApp.Controllers
             string filePath = Path.Combine(AppContext.BaseDirectory, "data", "flights-1m.parquet");
             var result = await _duckDb.QueryAsync<FlightData>($"SELECT * FROM read_parquet('{filePath}') LIMIT 10;");
             return Ok(result);
+        }
+
+        [HttpGet("TestLatency")]
+        public async Task<string> TestLatency()
+        {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            string filePath = Path.Combine(AppContext.BaseDirectory, "data", "generated", "*.parquet");
+            var result = await _duckDb.QueryAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM flights;");
+            sw.Stop();
+
+            string resultString = $"Elapsed time is: {sw.ElapsedMilliseconds} ms. Data: {JsonSerializer.Serialize(result)}";
+            return resultString;
         }
     }
 

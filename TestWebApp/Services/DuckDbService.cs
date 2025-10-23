@@ -1,34 +1,51 @@
 ﻿using DuckDB.NET.Data;
 using DuckDB.NET.Native;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
 
 namespace TestWebApp.Services
 {
-    public class DuckDbService : IAsyncDisposable
+    public class DuckDbService
     {
-        private readonly DuckDBConnection _connection;
-        private readonly string _dataFolder;
+        private readonly ConcurrentQueue<DuckDBConnection> _pool;
+        private readonly int _poolSize = 10;
 
-        public DuckDbService()
+        public DuckDbService(IConfiguration configuration)
         {
-            var basePath = AppContext.BaseDirectory;
-            var dbPath = Path.Combine(basePath, "local.duckdb");
-            _dataFolder = Path.Combine(basePath, "data");
+            var blobStorageConnectionString = configuration["BlobStorageConnectionString"];
 
-            if (!Directory.Exists(_dataFolder))
-                Directory.CreateDirectory(_dataFolder);
+            _pool = new ConcurrentQueue<DuckDBConnection>();
 
-            _connection = new DuckDBConnection($"DataSource={dbPath}");
-            _connection.Open();
+            for (int i = 0; i < _poolSize; i++)
+            {
+                var conn = new DuckDBConnection("DataSource=:memory:");
+                conn.Open();
+
+                using var cmd = conn.CreateCommand();
+
+                cmd.CommandText = $"SET azure_storage_connection_string = '{blobStorageConnectionString}'; ";
+                cmd.ExecuteNonQuery();
+
+                cmd.CommandText = $"CREATE VIEW generated AS SELECT * FROM read_parquet('azure://tantestdatalake.blob.core.windows.net/data/generated/*.parquet');";
+                cmd.ExecuteNonQuery();
+
+                cmd.CommandText = $"CREATE VIEW flights AS SELECT * FROM read_parquet('azure://tantestdatalake.blob.core.windows.net/data/flightdata/*.parquet');";
+                cmd.ExecuteNonQuery();
+
+                _pool.Enqueue(conn);
+            }
         }
 
         public async Task<IEnumerable<T>> QueryAsync<T>(string sql) where T : new()
         {
-            using var cmd = _connection.CreateCommand();
-            cmd.CommandText = sql;
+            if (!_pool.TryDequeue(out var connection))
+                throw new InvalidOperationException("No available DuckDB connections in pool");
 
+            using var cmd = connection.CreateCommand();
+
+            cmd.CommandText = sql;
             using var reader = await cmd.ExecuteReaderAsync();
 
             var results = new List<T>();
@@ -75,18 +92,11 @@ namespace TestWebApp.Services
                     }
                 }
 
-                results.Add(item); // Add the populated object to the list
+                results.Add(item);
             }
 
+            _pool.Enqueue(connection);
             return results;
-        }
-
-        public string GetDataFolder() => _dataFolder;
-
-        public ValueTask DisposeAsync()
-        {
-            _connection?.Dispose();
-            return ValueTask.CompletedTask;
         }
     }
 }
