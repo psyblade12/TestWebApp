@@ -51,6 +51,19 @@ namespace TestWebApp.Controllers
             }
         }
 
+        [HttpGet("TestLatency2")]
+        public async Task<string> TestLatency2()
+        {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            string filePath = Path.Combine(AppContext.BaseDirectory, "data", "generated", "*.parquet");
+            var result = await _duckDb.QueryAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM generated g INNER JOIN (SELECT * FROM read_parquet('{filePath}') WHERE datevalue = '2025-12-22' AND intvalue1 > 400 AND intvalue1  <950) as a ON g.ID <> a.ID WHERE g.datevalue = '2025-12-22' AND g.intvalue1 > 400 AND g.intvalue1 < 950 GROUP BY g.datevalue;");
+            sw.Stop();
+
+            string resultString = $"Elapsed time is: {sw.ElapsedMilliseconds} ms. Data: {JsonSerializer.Serialize(result)}";
+            return resultString;
+        }
+
         [HttpGet("ReturnString")]
         public async Task<string> ReturnString()
         {
