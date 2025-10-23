@@ -39,7 +39,7 @@ namespace TestWebApp.Controllers
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
                 string filePath = Path.Combine(AppContext.BaseDirectory, "data", "generated", "*.parquet");
-                var result = await _duckDb.QueryAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM read_parquet('azure://tantestdatalake.blob.core.windows.net/data/flightdata/*.parquet');");
+                var result = await _duckDb.QueryAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM flights;");
                 sw.Stop();
 
                 string resultString = $"Elapsed time is: {sw.ElapsedMilliseconds} ms. Data: {JsonSerializer.Serialize(result)}";
@@ -71,6 +71,19 @@ namespace TestWebApp.Controllers
             sw.Start();
             string filePath = Path.Combine(AppContext.BaseDirectory, "data", "flights-1m.parquet");
             var result = await _duckDb.QueryAsync<FlightData>($"SELECT * FROM read_parquet('{filePath}') LIMIT 10;");
+            sw.Stop();
+
+            string resultString = $"Elapsed time is: {sw.ElapsedMilliseconds} ms. Data: {JsonSerializer.Serialize(result)}";
+            return resultString;
+        }
+
+        [HttpGet("TestLatency4")]
+        public async Task<string> TestLatency4()
+        {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            string filePath = Path.Combine(AppContext.BaseDirectory, "data", "flights-1m.parquet");
+            var result = await _duckDb.QueryAsync<FlightData>($"SELECT * FROM flights LIMIT 10;");
             sw.Stop();
 
             string resultString = $"Elapsed time is: {sw.ElapsedMilliseconds} ms. Data: {JsonSerializer.Serialize(result)}";
