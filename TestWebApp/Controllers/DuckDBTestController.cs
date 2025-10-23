@@ -34,14 +34,22 @@ namespace TestWebApp.Controllers
         [HttpGet("TestLatency")]
         public async Task<string> TestLatency()
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            string filePath = Path.Combine(AppContext.BaseDirectory, "data", "generated", "*.parquet");
-            var result = await _duckDb.QueryAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM flights;");
-            sw.Stop();
+            try
+            {
+                throw new Exception();
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                string filePath = Path.Combine(AppContext.BaseDirectory, "data", "generated", "*.parquet");
+                var result = await _duckDb.QueryAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM flights;");
+                sw.Stop();
 
-            string resultString = $"Elapsed time is: {sw.ElapsedMilliseconds} ms. Data: {JsonSerializer.Serialize(result)}";
-            return resultString;
+                string resultString = $"Elapsed time is: {sw.ElapsedMilliseconds} ms. Data: {JsonSerializer.Serialize(result)}";
+                return resultString;
+            }
+            catch (Exception ex)
+            {
+                return $"An error occurred: {ex.Message}";
+            }
         }
     }
 
