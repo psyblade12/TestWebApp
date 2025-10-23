@@ -64,6 +64,19 @@ namespace TestWebApp.Controllers
             return resultString;
         }
 
+        [HttpGet("TestLatency3")]
+        public async Task<string> TestLatency3()
+        {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            string filePath = Path.Combine(AppContext.BaseDirectory, "data", "flights-1m.parquet");
+            var result = await _duckDb.QueryAsync<FlightData>($"SELECT * FROM read_parquet('{filePath}') LIMIT 10;");
+            sw.Stop();
+
+            string resultString = $"Elapsed time is: {sw.ElapsedMilliseconds} ms. Data: {JsonSerializer.Serialize(result)}";
+            return resultString;
+        }
+
         [HttpGet("ReturnString")]
         public async Task<string> ReturnString()
         {
