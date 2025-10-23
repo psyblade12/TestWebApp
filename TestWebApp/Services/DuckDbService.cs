@@ -20,7 +20,7 @@ namespace TestWebApp.Services
 
             for (int i = 0; i < _poolSize; i++)
             {
-                var conn = new DuckDBConnection("DataSource=:memory:");
+                var conn = new DuckDBConnection("DataSource=:memory:?cache=shared");
                 conn.Open();
 
                 using var cmd = conn.CreateCommand();
@@ -34,10 +34,10 @@ namespace TestWebApp.Services
                 cmd.CommandText = $"SET azure_storage_connection_string = '{blobStorageConnectionString}'; ";
                 cmd.ExecuteNonQuery();
 
-                cmd.CommandText = $"CREATE VIEW generated AS SELECT * FROM read_parquet('azure://tantestdatalake.blob.core.windows.net/data/generated/*.parquet');";
+                cmd.CommandText = $"CREATE OR REPLACE VIEW generated AS SELECT * FROM read_parquet('azure://tantestdatalake.blob.core.windows.net/data/generated/*.parquet');";
                 cmd.ExecuteNonQuery();
 
-                cmd.CommandText = $"CREATE VIEW flights AS SELECT * FROM read_parquet('azure://tantestdatalake.blob.core.windows.net/data/flightdata/*.parquet');";
+                cmd.CommandText = $"CREATE OR REPLACE VIEW flights AS SELECT * FROM read_parquet('azure://tantestdatalake.blob.core.windows.net/data/flightdata/*.parquet');";
                 cmd.ExecuteNonQuery();
 
                 _pool.Enqueue(conn);
