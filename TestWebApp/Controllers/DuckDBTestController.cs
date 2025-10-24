@@ -57,7 +57,7 @@ namespace TestWebApp.Controllers
             Stopwatch sw = new Stopwatch();
             sw.Start();
             string filePath = Path.Combine(AppContext.BaseDirectory, "data", "generated", "*.parquet");
-            var result = await _duckDb.QueryAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM generated g INNER JOIN (SELECT * FROM read_parquet('{filePath}') WHERE datevalue = '2025-12-22' AND intvalue1 > 400 AND intvalue1  <950) as a ON g.ID <> a.ID WHERE g.datevalue = '2025-12-22' AND g.intvalue1 > 400 AND g.intvalue1 < 950 GROUP BY g.datevalue;");
+            var result = await _duckDb.QueryAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM generated g INNER JOIN (SELECT * FROM generated WHERE datevalue = '2025-12-22' AND intvalue1 > 400 AND intvalue1  <950) as a ON g.ID <> a.ID WHERE g.datevalue = '2025-12-22' AND g.intvalue1 > 400 AND g.intvalue1 < 950 GROUP BY g.datevalue;");
             sw.Stop();
 
             string resultString = $"Elapsed time is: {sw.ElapsedMilliseconds} ms. Data: {JsonSerializer.Serialize(result)}";
@@ -97,7 +97,6 @@ namespace TestWebApp.Controllers
             {
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
-                string filePath = Path.Combine(AppContext.BaseDirectory, "data", "generated", "*.parquet");
                 var result = await _duckDb.QueryStoredProcedureAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM flights;");
                 sw.Stop();
 
@@ -117,7 +116,6 @@ namespace TestWebApp.Controllers
             {
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
-                string filePath = Path.Combine(AppContext.BaseDirectory, "data", "generated", "*.parquet");
                 var result = await _duckDb.QueryAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM flights WHERE FL_DATE >= '2006-01-01' AND FL_DATE <= '2006-01-01';");
                 sw.Stop();
 
@@ -128,6 +126,31 @@ namespace TestWebApp.Controllers
             {
                 return $"An error occurred: {ex.Message}";
             }
+        }
+
+        [HttpGet("TestLatency7")]
+        public async Task<string> TestLatency7()
+        {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            var result = await _duckDb.QueryAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM generated WHERE datevalue >= '2025-12-01' AND datevalue <= '2025-12-31'");
+            sw.Stop();
+
+            string resultString = $"Elapsed time is: {sw.ElapsedMilliseconds} ms. Data: {JsonSerializer.Serialize(result)}";
+            return resultString;
+        }
+
+        [HttpGet("TestLatency8")]
+        public async Task<string> TestLatency8()
+        {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            string filePath = Path.Combine(AppContext.BaseDirectory, "data", "generated", "*.parquet");
+            var result = await _duckDb.QueryAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM '{filePath}' WHERE datevalue >= '2025-12-01' AND datevalue <= '2025-12-31';");
+            sw.Stop();
+
+            string resultString = $"Elapsed time is: {sw.ElapsedMilliseconds} ms. Data: {JsonSerializer.Serialize(result)}";
+            return resultString;
         }
 
         [HttpGet("ReturnString")]
