@@ -172,6 +172,18 @@ namespace TestWebApp.Controllers
             }
         }
 
+        [HttpGet("TestLatency10")]
+        public async Task<string> TestLatency10()
+        {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            var result = await _duckDb.QueryAsync<FlightData>($"SELECT * FROM iceberg LIMIT 10;");
+            sw.Stop();
+
+            string resultString = $"Elapsed time is: {sw.ElapsedMilliseconds} ms. Data: {JsonSerializer.Serialize(result)}";
+            return resultString;
+        }
+
         [HttpGet("ReturnString")]
         public async Task<string> ReturnString()
         {
