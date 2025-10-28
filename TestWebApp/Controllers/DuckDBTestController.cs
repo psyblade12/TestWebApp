@@ -153,6 +153,25 @@ namespace TestWebApp.Controllers
             return resultString;
         }
 
+        [HttpGet("TestLatency9")]
+        public async Task<string> TestLatency9()
+        {
+            try
+            {
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                var result = await _duckDb.QueryAsync<FlightResult>($"SELECT COUNT(1) AS COUNT FROM iceberg WHERE FL_DATE >= '2006-01-01' AND FL_DATE <= '2006-01-01';");
+                sw.Stop();
+
+                string resultString = $"Elapsed time is: {sw.ElapsedMilliseconds} ms. Data: {JsonSerializer.Serialize(result)}";
+                return resultString;
+            }
+            catch (Exception ex)
+            {
+                return $"An error occurred: {ex.Message}";
+            }
+        }
+
         [HttpGet("ReturnString")]
         public async Task<string> ReturnString()
         {

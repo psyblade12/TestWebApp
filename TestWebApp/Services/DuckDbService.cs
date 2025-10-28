@@ -35,12 +35,16 @@ namespace TestWebApp.Services
                 if (i == 0)
                 {
                     cmd.CommandText = $"INSTALL azure; LOAD azure;";
+                    cmd.CommandText = $"INSTALL iceberg; LOAD iceberg;";
                     cmd.ExecuteNonQuery();
 
                     cmd.CommandText = $"CREATE OR REPLACE VIEW generated AS SELECT * FROM read_parquet('azure://tantestdatalake.blob.core.windows.net/data/generated/*.parquet');";
                     cmd.ExecuteNonQuery();
 
                     cmd.CommandText = $"CREATE OR REPLACE VIEW flights AS SELECT * FROM read_parquet('azure://tantestdatalake.blob.core.windows.net/data/flightdata/*.parquet');";
+                    cmd.ExecuteNonQuery();
+
+                    cmd.CommandText = $"CREATE OR REPLACE VIEW iceberg AS SELECT * FROM iceberg_scan('azure://tantestdatalake.blob.core.windows.net/data/iceberg_flights', version_name_format = '%s.metadata.json%s', allow_moved_paths = true);";
                     cmd.ExecuteNonQuery();
                 }
 
